@@ -1,0 +1,261 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[koi8-r]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{hyperref}
+\usepackage{mathtext}
+\usepackage[T2A]{fontenc}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage[justification=centering,labelsep=period]{caption}
+\usepackage{indentfirst}
+\usepackage[pdftex]{graphicx,color}
+\usepackage{textcomp}
+\usepackage{gnuplot-lua-tikz}
+\usepackage{tikz}
+\usepackage[europeanresistors,americaninductors]{circuitikz}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+
+
+
+% \renewcommand{\captionlabeldelim} {.}
+
+\makeatletter
+\renewcommand\@biblabel[1]{#1.}
+\makeatother
+
+\unitlength=1mm
+
+\usepackage{listings} %% собственно, это и есть пакет listings
+% \usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}} %% это сделает текст заголовка белым
+%% код ниже нарисует серую рамочку вокруг заголовка кода.
+\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\textwidth}{#1#2#3}}}
+% \captionsetup[lstlisting]{format=listing,labelfont=black,textfont=black}
+\renewcommand{\lstlistingname}{Листинг}
+
+\usetikzlibrary{circuits}
+\usetikzlibrary{circuits.ee}
+\usetikzlibrary{circuits.ee.IEC}
+\usetikzlibrary{circuits.logic.IEC}
+\usetikzlibrary{decorations.pathmorphing,patterns}
+\usetikzlibrary{arrows}
+
+
+\tikzset{circuit declare symbol = ac source}
+\tikzset{set ac source graphic = ac source IEC graphic}
+\tikzset{
+         ac source IEC graphic/.style=
+          {
+           transform shape,
+           circuit symbol lines,
+           circuit symbol size = width 3 height 3,
+           shape=generic circle IEC,
+           /pgf/generic circle IEC/before background=
+            {
+             \pgfpathmoveto{\pgfpoint{0pt}{-0.8pt}}
+             \pgfpathcosine{\pgfpoint{0.4pt}{0.4pt}}
+             \pgfpathsine{\pgfpoint{-0.4pt}{0.4pt}}
+             \pgfpathcosine{\pgfpoint{-0.4pt}{0.4pt}}
+             \pgfpathsine{\pgfpoint{0.4pt}{0.4pt}}
+             \pgfusepathqstroke
+            }
+          }
+        }
+
+\begin{document}
+ 
+\title{Семинар \No3 по курсу <<Электромагнитная совместимость
+РЭС>>. \\ Моделирование помехоподавляющего фильтра.}
+\author{к.т.н., доцент кафедры ЭИУ1-КФ Кузнецов В.В.}
+
+\maketitle
+
+\section{Введение}
+
+Целью семинара является изучение свойств помехоподавляющих пассивных
+LC-фильтров, моделирование частотных зависимостей их S-параметров и
+Z-параметров. 
+
+\section{Схемы помехоподавляющих фильтров}
+
+
+Основным средством подавления кондуктивных помех, создаваемых в цепях питания и
+коммутации постоянного  и переменного токов аппаратуры, является фильтрация.
+Предназначенные для этой цели фильтры позволяют снижать кондуктивные помехи как
+от внешних так и от внутренних источников (например со стороны сети питания и
+нагрузки). Эффективность фильтрации определяется вносимым затуханием фильтра
+(дБ):
+
+\begin{equation}
+ S=20\lg\left|\frac{\dot{U_1}}{\dot{U_2}}\right|
+\end{equation}
+
+\begin{equation}
+ S=20\lg\left|\frac{\dot{I_1}}{\dot{I_2}}\right|
+\end{equation}
+
+где $\dot{U_1}$, $\dot{I_1}$ --- напряжение и ток помех на нагрузке в исходном
+состоянии, $\dot{U_2}$, $\dot{I_2}$ --- напряжение и ток помех на нагрузке в
+цепи с фильтром.
+
+
+По своему назначению помехоподавляющие фильтры являются широкополосными
+фильтрами нижних частот (ФНЧ). Фильтры в цепях питания строятся как индуктивно-
+или резистивно-емкостные (LC или RC). Наиболее частот применяется П-образный
+LC-фильтр (схема рис.\ref{P-filt}).
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tikzpicture}[circuit ee IEC]
+
+% \begin{scope}[shift={(0,0)}]
+\node (V1) [ac source,info={$e_i$},point up] at (-0.5,0) {};
+\node (Zi) [resistor,point up, info={$Z_i$}] at (-0.5,1.2) {};
+\node (C1) [capacitor, point up, info={$C$}] at (1,0.5) {};
+\node (L1) [inductor, info={$L$}] at (2,2) {};
+\node (C2) [capacitor,point up,info={$C$}] at (3,0.5) {};
+\node (Zl) [resistor,point up,info={$Z_н$}] at (4,0.5) {};
+\node (p1) [contact] at (-0.5,-0.7) {};
+\node (p2) [contact] at (1,-0.7) {};
+\node (p3) [contact] at (1,2) {};
+\node (p4) [contact] at (3,-0.7) {};
+\node (p5) [contact] at (3,2) {};
+\node (gnd) [point down,ground] at (-0.5,-1.2) {};
+\draw (gnd) -- (V1) -- (Zi) |- (L1) -| (Zl) |- (p1);
+\draw (p2) -- (C1) -- (p3);
+\draw (p4) -- (C2) -- (p5);
+% \end{scope}
+\end{tikzpicture}
+\end{center}
+\caption{Схема помехоподавляющего П-образного ФНЧ. $Z_i$ --- внутреннее
+сопротивление источника, $Z_н$ --- внутренне сопротивление
+нагрузки.}\label{P-filt}
+\end{figure}
+
+Затухание является частотнозависимым и определяется по выражению:
+\begin{equation}
+ S=20\lg\left|\frac{A_{11}+A_{12}+A_{21}Z_iZ_н+A_{22}Z_н}{Z_i+Z_н}\right|
+\end{equation}
+\begin{equation}
+ A_{11}=1+\frac{Z_L}{Z_C}
+\end{equation}
+\begin{equation}
+ A_{12}=Z_L
+\end{equation}
+\begin{equation}
+ A_{21}=\frac{2}{Z_C}+\frac{Z_L}{Z_C^2}
+\end{equation}
+\begin{equation}
+ A_{22}=\frac{1+Z_L}{Z_C}
+\end{equation}
+$Z_C$ и $Z_L$ --- индуктивное и емкостное сопротивления:
+\begin{equation}
+ Z_L=j\omega L
+\end{equation}
+\begin{equation}
+ Z_C=\frac{1}{j\omega C}
+\end{equation}
+
+
+
+Для фильтрации помех в цепях постоянного тока применяется П-образный ФНЧ с
+двухобмоточным дросселем с тороидальным ферритовым сердечником
+(рис.\ref{P-filt2}). При использовании двухобмоточного дросселя постоянный
+составляющие токов, протекающие по его обмоткам взаимно компенсируются и не
+оказывает влияние на магнитные свойства сердечника. Нескомпенсированныя
+постоянная составляющая приводит к снижению магнитной проницаемости сердечника,
+снижению индуктивности катушки и снижению фильтрующих свойств.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[circuit ee IEC]
+% \begin{scope}[shift={(0,0)}]
+\node (V1) [ac source,info={$e_i$},point up] at (-0.5,0) {};
+\node (Zi) [resistor,point up, info={$Z_i$}] at (-0.5,1.2) {};
+\node (C1) [capacitor, point up, info={$C$}] at (1,0.5) {};
+\node (L1) [rotate=180,inductor, info'={$L_1$}] at (2.5,1) {};
+\node (L2) [inductor,info'={$L_2$}] at (2.5,0.5) {};
+\node (C2) [capacitor,point up,info'={$C$}] at (4,0.5) {};
+\node (Zl) [resistor,point up,info'={$Z_н$}] at (5,0.5) {};
+\node (p1) [contact] at (-0.5,-0.7) {};
+\node (p2) [contact] at (1,-0.7) {};
+\node (p3) [contact] at (1,2) {};
+\node (p4) [contact] at (4,-0.7) {};
+\node (p5) [contact] at (4,2) {};
+\node (gnd) [point down,ground] at (-0.5,-1.2) {};
+\draw (gnd) -- (V1) -- (Zi)  |- (p3) -- ++(0.5,0) |- (L1);
+\draw (p5) -- ++(-0.5,0) |- (L1);
+\draw (p5) -| (Zl) |- (p4);
+\draw (p4) -- ++(-0.5,0) |- (L2);
+\draw (p1)-- (p2) -- ++(0.5,0) |- (L2);
+\draw (p2) -- (C1) -- (p3);
+\draw (p4) -- (C2) -- (p5);
+\draw [very thick] (2,0.75) -- (3,0.75);
+% \end{scope}
+\end{tikzpicture}
+\caption{Помехоподавляющий фильтр с двухобмоточным дросселем.}\label{P-filt2}
+\end{figure}
+
+Подобные фильтры включаются по входной цепи импульсных источников питания (ИИП).
+
+Высокий коэффициент затухания не может быть получен с однозвённым фильтром,
+поэтому применяется каскадирование фильтров. На рис.\ref{multisec} показан
+трёхзвённый помехоподавляющий фильтр.
+
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}[circuit ee IEC]
+% \begin{scope}[shift={(0,0)}]
+\node (V1) [ac source,info={$e_i$},point up] at (-0.5,0) {};
+\node (Zi) [resistor,point up, info={$Z_i$}] at (-0.5,1.2) {};
+
+\foreach \x in {0,5,10} {
+\begin{scope}[shift={(\x,0)}]
+\node (C1) [capacitor, point up, info={$C$}] at (1,0.5) {};
+\node (L1) [rotate=180,inductor, info'={$L_1$}] at (2.5,1) {};
+\node (L2) [inductor,info'={$L_2$}] at (2.5,0.5) {};
+\node (C2) [capacitor,point up,info'={$C$}] at (4,0.5) {};
+
+
+\node (p2) [contact] at (1,-0.7) {};
+\node (p3) [contact] at (1,2) {};
+\node (p4) [contact] at (4,-0.7) {};
+\node (p5) [contact] at (4,2) {};
+
+\draw (p3) -- ++(0.5,0) |- (L1);
+\draw (p5) -- ++(-0.5,0) |- (L1);
+
+\draw (p4) -- ++(-0.5,0) |- (L2);
+\draw (p2) -- ++(0.5,0) |- (L2);
+\draw (p2) -- (C1) -- (p3);
+\draw (p4) -- (C2) -- (p5);
+\draw [very thick] (2,0.75) -- (3,0.75);
+\end{scope}
+}
+\foreach \x in {0,50mm} {
+\draw [xshift=\x] (4,2) -- (6,2);
+\draw [xshift=\x] (4,-0.7) -- (6,-0.7);
+}
+\node (p1) [contact] at (-0.5,-0.7) {};
+\node (gnd) [point down,ground] at (-0.5,-1.2) {};
+\node (Zl) [resistor,point up,info'={$Z_н$}] at (15,0.5) {};
+\draw (p5) -| (Zl) |- (p4);
+\draw (gnd) -- (V1) -- (Zi)  |- (1,2);
+\draw (p1) -- (1,-0.7);
+% \end{scope}
+\end{tikzpicture}
+\caption{Трёхзвенный помехоподавляющий фильтр с двухобмоточным
+дросселем.}\label{multisec}
+\end{figure}
+
+\section{Моделирование ФНЧ в программе Qucs}
+
+\subsection{Моделирование П-образного ФНЧ}
+
+\subsection{Задание для самостоятельной работы}
+
+
+\end{document}
