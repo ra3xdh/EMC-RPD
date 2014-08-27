@@ -1,0 +1,293 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[koi8-r]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{hyperref}
+\usepackage{mathtext}
+\usepackage[T2A]{fontenc}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage[justification=centering,labelsep=period]{caption}
+\usepackage{indentfirst}
+\usepackage[pdftex]{graphicx,color}
+\usepackage{textcomp}
+\usepackage{gnuplot-lua-tikz}
+\usepackage{tikz}
+\usepackage[europeanresistors,americaninductors]{circuitikz}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+
+
+
+% \renewcommand{\captionlabeldelim} {.}
+
+\makeatletter
+\renewcommand\@biblabel[1]{#1.}
+\makeatother
+
+\unitlength=1mm
+
+\usepackage{listings} %% собственно, это и есть пакет listings
+% \usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}} %% это сделает текст заголовка белым
+%% код ниже нарисует серую рамочку вокруг заголовка кода.
+\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\textwidth}{#1#2#3}}}
+% \captionsetup[lstlisting]{format=listing,labelfont=black,textfont=black}
+\renewcommand{\lstlistingname}{Листинг}
+
+\usetikzlibrary{circuits}
+\usetikzlibrary{circuits.ee}
+\usetikzlibrary{circuits.ee.IEC}
+\usetikzlibrary{circuits.logic.IEC}
+\usetikzlibrary{decorations.pathmorphing,patterns}
+\usetikzlibrary{arrows}
+
+
+\tikzset{circuit declare symbol = ac source}
+\tikzset{set ac source graphic = ac source IEC graphic}
+\tikzset{
+         ac source IEC graphic/.style=
+          {
+           transform shape,
+           circuit symbol lines,
+           circuit symbol size = width 3 height 3,
+           shape=generic circle IEC,
+           /pgf/generic circle IEC/before background=
+            {
+             \pgfpathmoveto{\pgfpoint{0pt}{-0.8pt}}
+             \pgfpathcosine{\pgfpoint{0.4pt}{0.4pt}}
+             \pgfpathsine{\pgfpoint{-0.4pt}{0.4pt}}
+             \pgfpathcosine{\pgfpoint{-0.4pt}{0.4pt}}
+             \pgfpathsine{\pgfpoint{0.4pt}{0.4pt}}
+             \pgfusepathqstroke
+            }
+          }
+        }
+
+\begin{document}
+ 
+\title{Семинар \No3 по курсу <<Электромагнитная совместимость
+РЭС>>. \\ Способы измерения помех.}
+\author{к.т.н., доцент кафедры ЭИУ1-КФ Кузнецов В.В.}
+
+\maketitle
+
+\section{Ведение}
+
+\section{Средства сопряжения измерительного оборудования с источником помех}
+
+\subsection{Схемы измерения кондуктивных помех}
+
+Помехи по сети питания могут быть измерены при помощи эквивалента сети или
+пробника напряжения. Схемы измерения уровня помех установлены государственными
+стандартами.
+
+Схема измерения при помощи эквиалента сети применяется для измерения помех
+отдаваемых аппаратурой (например источником вторичного электропитания --- ИВЭП)
+в питающую сеть. Схема измерения показана на рис.\ref{ism-ES}.
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tikzpicture}
+\draw (0,0) rectangle (2,1.5);
+\node at (1,0.75) {ЭС};
+\draw [xshift=35mm] (0,0) rectangle (2,1.5);
+\node [xshift=35mm]  at (1,0.75) {РЭА};
+\draw [yshift=-25mm] (0,0) rectangle (2,1.5);
+\node [yshift=-25mm]  at (1,0.75) {ИРП};
+\draw [-latex]  (0,0.5) -- (-1,0.5);
+\draw [-latex]  (0,1) -- (-1,1);
+\draw (2,0.5) -- (3.5,0.5);
+\draw (2,1) -- (3.5,1);
+\draw (1,0) -- (1,-1);
+\node [anchor=east] at (-1,0.75) {$U_c$};
+\end{tikzpicture}
+\end{center}
+\caption{Структурная схема измерение напряжения помех, отдаваемых РЭА в питающую
+сеть при помощи эквивалента сети (ЭС). ИРП --- измеритель помех}\label{ism-ES}
+\end{figure}
+
+Как правило производится измерение помех при помощи селективного
+микровольтметра, который представляет собой супергетеродинный широкополосный
+радиоприёмник с калиброванной АРУ. Ведущим производителем селективных
+микровольтметров является фирма Rohde\&Schwarz. 
+
+Пробник напряжения подобен частотнокомпенсированному делителю, применяемому в
+осциллографах. Он включается параллельно нагрузке и применяется как правило для
+измерения помех, отдаваемых РЭА (как правило ИВЭП) в нагрузку. 
+
+
+\subsection{Эквиваленты сети}
+
+Для отбора напряжения помех из сети питания и согласования сети питания со
+входом измерительного прибора применяются эквиваленты сети. Эквивалент сети
+(англ. Line Impedance Stabilization Network, сокр. LISN) это электротехническое
+приспособление, которое используется как эквивалент сети низкого напряжения при
+измерениях и тестах на электромагнитную совместимость.
+
+Эквивалент сети решает следующие задачи:
+
+1. Снабжение проверяемого устройства сетевым напряжением.
+
+2. Отфильтровывание высокочастотных составляющих сетевого напряжения.
+
+3. Предоставление проверяемому устройству стандартного импеданса со стороны
+сети.
+
+4. Соединение проверяемого устройства и измерительного прибора.
+
+Наиболее частот применяется V-образный эквивалент сети. Его схема показана на
+рис.\ref{NNB}. Прибор применяется при измерении помех как в сетях постоянного,
+так и переменного тока.
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tikzpicture}[circuit ee IEC]
+\node (V1) [ac source,info={$V_1$},point up] at (-1,1) {};
+\node (L1) [inductor,info={$L_{эс}$}] at (1,2) {};
+\node (L2) [inductor,info={$L_{эс}$}] at (1,0) {};
+\node (C1) [capacitor,point up,info={$C_{эс}$}] at (2,-1) {};
+\node (C2) [capacitor,point up,info={$C_{эс}$}] at (3.5,-1) {};
+\node (R1) [resistor,point up,info={$R_c$}] at (2,-2.5) {};
+\node (R2) [resistor,point up,info={$R_c$}] at (3.5,-2.5) {};
+\node (gnd1) [ground, point down] at (2,-3.5) {};
+\node (gnd2) [ground, point down] at (3.5,-3.5) {};
+\node (p1) [contact] at (2,0) {};
+\node (p2) [contact] at (3.5,2) {};
+\node (p3) [contact] at (2,-1.5) {};
+\node (p4) [contact] at (3.5,-1.5) {};
+\node (Z) [draw, inner sep=2mm] at (6,1) {Нагрузка};
+\draw (V1) |- (L1) -| (Z) |- (L2) -| (V1);
+\draw (p1) -- (C1) -- (R1) -- (gnd1);
+\draw (p2) -- (C2) -- (R2) -- (gnd2);
+\draw [dashed] (0,3) rectangle (4,-4);
+\draw [-latex] (p3) -- ++(-2.5,0) node [anchor=east] {К измерителю};
+\draw [-latex] (p4) -- ++(1.5,0) node [anchor=west] {К измерителю};
+\node [anchor=south] at (2,3.2) {Эквивалент сети};
+\end{tikzpicture}
+\end{center}
+\caption{Схема включения двухпроводного V-образного эквивалента
+сети.}\label{NNB}
+\end{figure}
+
+Данная схема позволяет измерять напряжение радиопомех по каждому проводу
+отдельно.
+
+На схеме элементы $L_{эс}С_{эс}R_c$ образуют фильтр, предотвращающий попадание
+в измеритель помех напряжения с частотой сети. Конденсаторы $C_{эс}$ отделяют
+постоянную составляющую. 
+
+Эквиваленты сети производит фирма Rohde\&Schwarz.
+
+\subsection{Пробники напряжения}
+
+Пробник напряжения выполняет задачу отделения постоянной составляющей от
+напряжения помех и согласования входа измерителя помех с сетью. Пробник вносит
+затухание в измеряемый сигнал. Типовая схема пробника показана на
+рис.\ref{probe}.
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tikzpicture}[circuit ee IEC]
+\node (C) [capacitor,info=$C_1$,info'={1000 pF}] at (-0.5,0) {};
+\node (R1) [resistor,info=$R_1$,info'={75\textohm}] at (1,0) {};
+\node (R2) [resistor,point up,info=$R_2$,info'={50\textohm}] at (2,-1.3) {};
+\node (gnd) [ground, point down] at (2,-2.5) {};
+\node (p1) [contact] at (2,0) {};
+\draw (C) -- (R1) -| (R2) -- (gnd);
+\draw [-latex] (p1) -- ++(1,0) node [anchor=west] {Выход};
+\draw [-latex] (C) -- ++(-1,0) node [anchor=east] {Вход};
+\end{tikzpicture}
+\end{center}
+\caption{Схема электрическая принципиальная пробника для измерения
+напряжения радиопомех}\label{probe}
+\end{figure}
+
+\section{Моделирование характеристик эквивалента сети и пробника напряжения в
+частотной области}
+
+\subsection{Эквивалент сети NNB-101}
+
+Промоделируем АЧХ эквивалента сети NNB-101. Нужно провести моделирование АЧХ со
+стороны линии на вход, со стороны нагрузки. Эквивалент сети  NNB-101
+предназначен для измерения уровня кондуктивных помех в сетях питания при помощи
+селективного микровольтметра со входным сопротивлением 75 Ом. 
+
+Чтобы снять данные характеристики в Qucs имеется моделирование S-параметров
+многопортовой схемы. Чтобы произвести такое моделирование, на схеме нужно
+разместить несколько источников питания и выполнить моделирование S-параметров.
+
+Пример схемы эквивалента сети с моделированием S-параметров многопортовой схемы
+показан на рис.\ref{NNB-qucs}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{sem4img/NNB-qucs.pdf}
+\end{center}
+\caption{Эквиалент сети NNB-101}\label{NNB-qucs}
+\end{figure}
+
+Коэффициенту передачи со стороны линии питающего напряжения на выходы будет
+соответствовать параметры $S_{13}$ и $S_{14}$, а со стороны аппаратуры на выходы
+--- параметры $S_{23}$ и $S_{24}$. На рис.\ref{NNB-S13} показана частотная
+зависимость коэффициента передачи со стороны линии, а на рис.\ref{NNB-S23} ---
+коэффициента передачи со стороны проверяемой аппаратуры.  Оба выхода прибора
+(\verb|out1| и \verb|out2|) равнозначны и коэффициент передачи одинаков.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{sem4img/NNB-qucs-in.pdf}
+\end{center}
+\caption{Коэффициент передачи эквивалента сети со стороны
+линии питания}\label{NNB-S13}
+\end{figure}
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{sem4img/NNB-qucs-out.pdf}
+\end{center}
+\caption{Коэффициент передачи эквивалента сети со стороны
+аппаратуры}\label{NNB-S23}
+\end{figure}
+
+Из полученных зависимостей видно, что эквивалент сети пропускает все
+высокочастотные (ВЧ) составляющие спектра помех со стороны аппаратуры и
+блокирует постоянную составляющую и низкочастотные составляющие напряжения
+питания. Компонент \verb|Уравнение1| переводит значения S-параметров в децибелы.
+
+\subsection{Пробник TK-111}
+
+Пробник TK-111 представляет собой RC-ФВЧ, который блокирует постоянную
+составляющую на входе прибора для измерения помех. Схема пробника в Qucs
+показана на рис.\ref{TK111-qucs}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{sem4img/TK111-qucs.pdf}
+\end{center}
+\caption{Моделирование пробника ТК-111}\label{TK111-qucs}
+\end{figure}
+
+В результате моделирования мы получим зависимость коэффициента передачи
+пробника $S_{21}$ от частоты.
+
+\subsection{Задание для самостоятельной работы}
+
+Смоделировать в программе Qucs схему эквивалента сети рис. \ref{NNB-qucs} и
+добиться её работоспособности. В отчёт включить схему и зависимости
+коэффициента передачи со стороны линии питания и аппаратуры. Выполнить подписи
+по осям графиков.
+
+Выполнить моделирование схемы пробника TK-111 рис.\ref{TK111-qucs}. В отчёт
+включить зависимость коэффициента передачи от частоты. График построить в
+логарифмическом масштабе и выполнить подписи по осям. 
+
+\section{Заключение}
+
+В результате выполнения семинара студенты ознакомились с аппаратурой для
+сопряжения измерителей уровня помех с объектом измерения: эквивалентами сети и
+пробниками напряжения. Проведено моделирование данного типа устройств при
+помощи моделирования S-параметров многопортовой схемы. 
+
+\end{document}
