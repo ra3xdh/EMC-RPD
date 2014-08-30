@@ -1,0 +1,226 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[koi8-r]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{hyperref}
+\usepackage{mathtext}
+\usepackage[T2A]{fontenc}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage[justification=centering,labelsep=period]{caption}
+\usepackage{indentfirst}
+\usepackage[pdftex]{graphicx,color}
+\usepackage{textcomp}
+\usepackage{gnuplot-lua-tikz}
+\usepackage{tikz}
+\usepackage[europeanresistors,americaninductors]{circuitikz}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+
+
+
+% \renewcommand{\captionlabeldelim} {.}
+
+\makeatletter
+\renewcommand\@biblabel[1]{#1.}
+\makeatother
+
+\unitlength=1mm
+
+\usepackage{listings} %% собственно, это и есть пакет listings
+% \usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}} %% это сделает текст заголовка белым
+%% код ниже нарисует серую рамочку вокруг заголовка кода.
+\DeclareCaptionFormat{listing}{\colorbox{white}{\parbox{\textwidth}{#1#2#3}}}
+% \captionsetup[lstlisting]{format=listing,labelfont=black,textfont=black}
+\renewcommand{\lstlistingname}{Листинг}
+
+% \usetikzlibrary{circuits}
+% \usetikzlibrary{circuits.ee}
+% \usetikzlibrary{circuits.ee.IEC}
+% \usetikzlibrary{circuits.logic.IEC}
+% \usetikzlibrary{decorations.pathmorphing,patterns}
+% \usetikzlibrary{arrows}
+
+% 
+% \tikzset{circuit declare symbol = ac source}
+% \tikzset{set ac source graphic = ac source IEC graphic}
+% \tikzset{
+%          ac source IEC graphic/.style=
+%           {
+%            transform shape,
+%            circuit symbol lines,
+%            circuit symbol size = width 3 height 3,
+%            shape=generic circle IEC,
+%            /pgf/generic circle IEC/before background=
+%             {
+%              \pgfpathmoveto{\pgfpoint{0pt}{-0.8pt}}
+%              \pgfpathcosine{\pgfpoint{0.4pt}{0.4pt}}
+%              \pgfpathsine{\pgfpoint{-0.4pt}{0.4pt}}
+%              \pgfpathcosine{\pgfpoint{-0.4pt}{0.4pt}}
+%              \pgfpathsine{\pgfpoint{0.4pt}{0.4pt}}
+%              \pgfusepathqstroke
+%             }
+%           }
+%         }
+
+\begin{document}
+ 
+\title{Семинар \No5 по курсу <<Электромагнитная совместимость
+РЭС>>. \\ Спектр радиопомех, отдаваемых в сеть тиристорным
+регулятором мощности переменного тока.}
+\author{к.т.н., доцент кафедры ЭИУ1-КФ Кузнецов В.В.}
+
+\maketitle
+
+\section{Ведение}
+
+Целью семинара является изучение спектра помех в тиристорном регуляторе
+переменного тока и моделирование спектра помех с использованием программы Qucs.
+
+\section{Тиристорный регулятор мощности переменного тока как источник помех}
+
+\subsection{Принцип действия тиристорного регулятора мощности переменного тока}
+
+Рассмотрим тиристорный регулятор с фазовым управлением. Его схема показана на
+рис.\ref{thyr-phase}.
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{circuitikz}
+\draw (-1,0) to [sV,l=$U_c$] (-1,2)
+             to [R, l=$R_н$,i>_=$I_н$] (2,2)
+             to [Ty,l={VS},*-,n=VS] (2,0);
+\draw (VS.G) to [R,mirror,l=$R_у$,i<_=$I_у$] ++(4,0) |- (2,2);
+\draw (VS.cathode) |- (-1,0);
+\end{circuitikz}
+\end{center}
+\caption{Тиристорный регулятор с фазовым управлением}\label{thyr-phase}
+\end{figure}
+
+Тиристор VS1 включен в разрыв нагрузки $R_н$ источника переменного тока $U_c$.
+В качестве нагрузки может использоваться коллекторный электродвигатель,
+нагревательный элемент, лампа накаливания и т.п. В течение каждого полупериода
+сетевого напряжения тиристор открывается как только ток его управляющего
+электрода достигнет порогового тока открывания тиристора. Ток нагрузки $I_н$
+имеет следующую форму:
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tikzpicture}
+\draw [-latex] (0,-1.2) -- (0,1.2) node  [anchor=south] {$I_н$};
+\draw [-latex] (-0.3,0) -- (9.6,0) node  [anchor=west] {$t$};
+\foreach \p in {0,3.6cm,7.2cm} {
+\draw [xshift=\p,very thick] (0.6,0) -- (0.6,0.866);
+ \draw [xshift=\p,thick, x=0.01cm, y=1cm,
+declare function={s1(\t)=sin(\t);}]
+plot [domain=60:180, samples=144, smooth] (\x,{s1(\x)});
+}
+\draw [dashed, x=0.01cm, y=1cm,
+declare function={s1(\t)=sin(\t);}]
+plot [domain=0:900, samples=144, smooth] (\x,{s1(\x)});
+\draw (0.6,0) -- ++(0,-0.8);
+\draw [latex-latex] (0,-0.7) -- (0.6,-0.7) node [pos=0.5,anchor=south]
+{$\alpha$};
+\end{tikzpicture}
+\end{center}
+\caption{Осциллограмма тока нагрузки}
+\end{figure}
+
+Напряжение источника переменного тока изменяется по синусоидальному закону и
+определяется амплитудным напряжением $U_m$ и частотой $f$:
+
+\begin{equation}
+ U_c= U_m \sin(2\pi f t)
+\end{equation}
+
+
+Момент открывания тиристора соответствует угол управления $\alpha$. В обратном
+направлении тиристор не проводит. Если $\alpha=0$, то мощность в нагрузке
+максимальна, если $\alpha=180\,\mathring{}$, то мощность равна нулю, тиристор
+закрыт. Меняя сопротивление резистора $R_у$ можно изменять угол управления в
+пределах от 0 до 90\textdegree (половинная мощность). Применяя электронные
+схемы фазового управления можно изменять угол управления в пределах от 0 до
+180\textdegree.
+
+В момент включения тиристора ток нагрузки скачком возрастает до некоторого
+значения $I_0$, определяемого как:
+
+\begin{equation}
+ I_0=\frac{U_m}{R_н}\sin\alpha
+\end{equation}
+
+Этот скачок тока создаёт значительные радио помехи, отдаваемые в питающую сеть
+и в нагрузку, превышающие установленные нормы более чем на 50 дБ в широкой
+полосе частот.
+
+
+
+
+\subsection{Анализ спектра помех тиристорного регулятора мощности переменного
+тока}
+
+Спектр помех тиристорного регулятора определяется с использованием
+преобразования Фурье. Тиристор заменяется идеальным электронным ключом, на
+котором до его замыкания имеется некоторая ЭДС $E_т$. Спектр помех $S(j\omega)$
+определяется выражением:
+
+\begin{equation}
+ S(j\omega)=\frac{E_т}{j\omega}(\sin\alpha+\frac{\Omega}{j\omega}\cos\alpha)
+\end{equation}
+
+Где $\Omega$ --- угловая частота сети питания:
+\begin{equation}
+ \Omega = 2\pi f_c
+\end{equation}
+
+Модуль спектральной плотности помех равен:
+
+\begin{equation}
+ |S(j\omega)|=\frac{E_т}{\omega}\sqrt{\sin^2\alpha+
+              \left(\frac{\Omega}{\omega}\right)^2\cos^2\alpha}
+\end{equation}
+
+Максимум модуля спектральной плотности достигается при $\alpha=90$\textdegree и
+для некоторой частоты $f$ из диапазона измерения он равен:
+\begin{equation}
+ |S(j\omega)|=\frac{E_т}{2\pi f}
+\end{equation}
+
+
+
+\section{Моделирование спектра помех в тиристорном регуляторе}
+
+Промоделируем тиристорный регулятор в программе Qucs. Его схема показана на
+рис.\ref{thyr-qucs}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{sem5img/thyr-qucs.pdf}
+\end{center}
+\caption{Схема тиристорного регулятора в Qucs}\label{thyr-qucs}
+\end{figure}
+
+Для измерения напряжения помех используется V-образный эквивалент сети
+(компоненты L1L2C1C2R3R4). Напряжение помех снимается с узла \verb|w1| или
+\verb|w2|.
+
+Чтобы вычислить спектр помех сначала производит моделирование переходного
+процесса. Нужно промоделировать как минимум один период сетевого напряжения
+($1/50\,\,Гц = 20\,\,мс$). Затем вычисляем быстрое преобразование Фурье (БПФ)
+при помощи функции \verb|Time2Freq()|. Её результатом будет спектр напряжения с
+некоторым уровнем $U$.
+
+Чтобы перевести выразить спектр в дБмкв, то есть в децибелах относительно
+опорного напряжения $U_0=1\,мкВ$, используем следующее выражение:
+
+\begin{equation}
+ U(\mbox{дБмкВ})=20\lg\frac{U}{U_0}
+\end{equation}
+
+
+
+\section{Заключение}
+
+\end{document}
