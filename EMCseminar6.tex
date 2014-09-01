@@ -36,12 +36,12 @@
 % \captionsetup[lstlisting]{format=listing,labelfont=black,textfont=black}
 \renewcommand{\lstlistingname}{Листинг}
 
-% \usetikzlibrary{circuits}
-% \usetikzlibrary{circuits.ee}
-% \usetikzlibrary{circuits.ee.IEC}
-% \usetikzlibrary{circuits.logic.IEC}
-% \usetikzlibrary{decorations.pathmorphing,patterns}
-% \usetikzlibrary{arrows}
+\usetikzlibrary{circuits}
+\usetikzlibrary{circuits.ee}
+\usetikzlibrary{circuits.ee.IEC}
+\usetikzlibrary{circuits.logic.IEC}
+\usetikzlibrary{decorations.pathmorphing,patterns}
+\usetikzlibrary{arrows}
 
 % 
 % \tikzset{circuit declare symbol = ac source}
@@ -228,9 +228,190 @@ R2 --- измерительный резистор; L1 --- паразитная индуктивность}\label{CDM}
 
 \section{Моделирование ЭСР в Qucs}
 
+\subsection{Моделирование HBM ЭСР}
+
 Исследуем форму тока при электростатическом разряде при помощи моделирования
-переходного процесса.
+переходного процесса. Сначала смоделируем HBM ЭСР. Эквивалентная схема
+испытаний на воздействие HBM ЭСР показана на рис.\ref{HBM-qucs}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{sem6img/HBM-qucs.pdf}
+\end{center}
+\caption{Моделирование HBM ЭСР в программе Qucs.}\label{HBM-qucs}
+\end{figure}
+
+Конденсатор С1 на схеме заряжен до напряжения тестирования. Ключ S1 имитирует
+контакт разрядного электрода с заземлением. Такой метод испытаний применяется
+для калибровки разрядных стендов. Вместо виртуального амперметра \verb|Pr1| в
+схеме включается безиндуктивный датчик тока, который соединяется с электронным
+осциллографом. Таким образом можно наблюдать форму тока разряда. Форма тока
+разряда, полученная в результате моделирования, показана на
+рис.\ref{HBM-qucs-I}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.75\textwidth]{sem6img/HBM-qucs-I.pdf}
+\end{center}
+\caption{Форма тока HBM ЭСР.}\label{HBM-qucs-I}
+\end{figure}
+
+Видно, что ток при данном виде ЭСР спадает по экспоненциальному закону от
+начального значения $I_0$:
+
+\begin{equation}
+ I_0=\frac{U_{esd}}{R}
+\end{equation}
+
+до нуля. Постоянная времени $\tau$ равна:
+
+\begin{equation}
+ \tau=RC
+\end{equation}
+
+
+\subsection{Моделирование MM ЭСР}
+
+Аналогично может быть промоделирован MM ЭСР (схема рис.\ref{MM-qucs}).
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{sem6img/MM-qucs.pdf}
+\end{center}
+\caption{Моделирование MM ЭСР в программе Qucs.}\label{MM-qucs}
+\end{figure}
+
+Отличием здесь является то, что нужно учитывать сопротивление контактов и дуги,
+которая образуется при искрении при разряде. Эти сопротивления внося затухание
+в эквивалентный колебательный контур и определяют форму тока, которая имеет вид
+затухающих колебаний (рис.\ref{MM-qucs-I}).
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.75\textwidth]{sem6img/HBM-qucs-I.pdf}
+\end{center}
+\caption{Форма тока MM ЭСР.}\label{MM-qucs-I}
+\end{figure}
+
+Видно, что индуктивность даёт выброс тока и амплитуда этих выбросов намного
+превышает ток при HBM ЭСР. В реальной аппаратуре эти выбросы тока приводят к
+повышенным перегрузкам в электронном компоненте, подверженном ЭСР. Поэтому
+порог отказа компонента при MM ЭСР как правило значительно ниже сем при HBM ЭСР.
+
+\subsection{Моделирование CDM ЭСР}
+
+Для испытаний ИМС на воздействие CDM ЭСР обычно применяется метод FCDM, при
+котором микросхема заряжается в результате электростатической индукции. Схема
+установки для FCDM-испытаний показана на рис.\ref{FCDM-tester}. Методика
+испытаний регламентирована стандартом JEDEC JESD22-C101E. В
+процессе испытаний вместо тестируемой микросхемы может устанавливаться
+калибровочный модуль, имеющий вид диска, размеры которого регламентируются
+стандартом.
+
+\begin{figure}[!ht]
+\begin{center}
+\begin{tikzpicture}[circuit ee IEC]
+\draw (-2.5,0) rectangle (2.5,0.3);
+\draw (-2.0,0.3) rectangle (2.0,0.6);
+\draw [very thick] (-1,0.6) rectangle (1,1.1);
+\draw (-1,0.85) -- (1,0.85);
+\draw [very thick] (-1,0.85) -| ++(-0. 25,0.5);
+\draw [very thick] (1,0.85) -| ++(0.25,0.5);
+\draw (-2,5.0) rectangle (2,5.3);
+\draw (1.0,5.0) rectangle (1.5,5.3);
+\fill [pattern=north east lines] (1.0,5.0) rectangle (1.5,5.3);
+\node (UHV) [draw,inner sep=5mm,text width=25mm, align=center] at (-6.5,2)
+{Источник высокого напряжения};
+\node (R1) [resistor={info=$R_1$,info'=\textasciitilde 100 МОм}] at (-3.5,3.5)
+{};
+\node (C3) [point up, capacitor={info=$C_3$}] at (-1.8,4) {};
+\node (C1) [point up, capacitor={info=$C_1$}] at (0,2) {};
+\node (C2) [point up, capacitor={info=$C_2$}] at (0,-0.5) {};
+\node (L1) [point up, inductor={info=$L_1$}] at (1.25,3.5) {};
+\node (R2) [point up, resistor={info=$R_2$}] at (1.25,2) {};
+\node (gnd1) [point down, ground] at (-4.5,4.5) {};
+\node (gnd2) [point down, ground] at (-6.5,-0.5) {};
+\node (p1) [contact] at (0,5) {};
+\node (p2) [contact] at (-1.8,5) {};
+\node (p3) [contact] at (-1.8,0.3) {};
+\node (p4) [contact] at (-2.3,0.3) {};
+\node (p5) [contact] at (-2.3,0) {};
+\node (RG) [anchor = south east] at (-0.5,5.5) {Разрядная головка};
+\node (DR) [anchor = south west, text width = 25mm,inner sep=0] at (3,4.5)
+{\underline{Дисковый резистор 1 Ом}};
+\node (RK) [anchor = south west, text width = 25mm,inner sep=0] at (3,3)
+{\underline{Сопротивление  дуги}};
+\node (DUT) [anchor = south west, text width = 20mm,inner sep=0] at (3,1.5)
+{\underline{Тестируемый компонент}};
+\node (Is)[anchor = south west, text width = 15mm,inner sep=0] at (3,0.5)
+{\underline{Изолятор}}; 
+\node (KP) [anchor = south west, text width =20mm,inner sep=0] at (3,-0.85)
+{\underline{Калибровочная пластина}};
+\draw (gnd2) -- (UHV) |- (R1) -| (p4);
+\draw (p5) -- ++(0,-1) -| (C2) -- (C1) -- (p1);
+\draw (p2) -- (C3) -- (p3);
+\draw (1.25,0.85) -- (R2) -- (L1) -- ++(0.0,2.0);
+\draw (p2) -| (gnd1);
+\draw [-latex] (DR.south west) -- (1.5,5);
+\draw [-latex] (RK.south west) -- (R2);
+\draw [-latex] (DUT.south west) -- (1.25,0.85);
+\draw [-latex] (Is.south west) -- (2.0,0.6);
+\draw [-latex] (KP.south west) -- (2.5,0);
+\end{tikzpicture}
+% \includegraphics[width=0.8\textwidth]{FCDM.pdf} 
+\end{center}
+\caption{Схема установки для FCDM-испытаний.} \label{FCDM-tester}
+\end{figure}
+
+
+Ёмкость С2 на рис.\ref{FCDM-tester} в основном определяется ёмкостью выводной
+рамки и сильно зависит от конструкции корпуса микросхемы. Схема представленная
+на рис.\ref{FCDM-tester} является упрощённой, так как на самом деле ёмкость С2
+между корпусом микросхемы и пластиной является распределённой и складывается из
+ёмкостей отдельных выводов на пластину $C_{pin}$. Ёмкость $C_2$ заряжена до
+напряжения равного:
+\begin{equation}
+ U_{ИМС}=\frac{U_0 C_1}{C_1+С_2} \label{Udut}
+\end{equation}
+
+Теперь промоделируем эту схему в Qucs и получим форму тока ЭСР. Эквивалентная
+схема CDM ЭСР показана на рис. \ref{CDM-qucs}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{sem6img/FCDM-qucs.pdf}
+\end{center}
+\caption{Моделирование FCDM ЭСР в программе Qucs.}\label{CDM-qucs}
+\end{figure}
+
+Начальное напряжение на конденсаторе С2 рассчитано из выражения (\ref{Udut}).
+Напряжение ЭСР равно 1 кВ = 1000 В. Форма тока ЭСР и форма напряжения на ИМС
+$U_{ИМС}$, полученные в результате моделирования показаны
+на рис.\ref{CDM-qucs-I}.
+
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{sem6img/FCDM-qucs-I.pdf}
+\end{center}
+\caption{Форма тока FCDM ЭСР.}\label{CDM-qucs-I}
+\end{figure}
+
+Из рисунка видно, что длительность переходного процесса при CDM ЭСР очень мала
+и составляет порядка нескольких наносекунд. Амплитуда тока достигает 10 А.
+Таким образом скорость срабатывания схем защиты при CDM ЭСР может оказаться
+недостаточной и микросхема всё равно выйдет из строя даже при наличии защиты.
+
+
+\subsection{Задание для самостоятельной работы}
+
+Промоделировать схемы HBM, MM и CDM ЭСР (рис.\ref{HBM-qucs}, \ref{MM-qucs-I},
+\ref{CDM-qucs-I}). В отчёт включить графики тока разряда. Выполнить подписи по
+осям на русском языке. 
 
 \section{Заключение}
+
+В результате выполнения семинара студенты ознакомились с электростатическим
+разрядом и его воздействием на РЭА. Рассмотрены три модели воздействия ЭСР:
+HBM, MM и CDM. Выполнено моделирование переходного процесса при ЭСР.
 
 \end{document}
